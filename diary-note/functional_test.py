@@ -1,7 +1,24 @@
 from selenium import webdriver
+import unittest
 
-browser = webdriver.Chrome('C:\chromedriver.exe')
-browser.get('http://127.0.0.1:8000')
 
-assert 'Django' in browser.title
+class DiaryListTest(unittest.TestCase):
+
+    def setUp(self):
+        self.browser = webdriver.Chrome('C:/chromedriver.exe')
+
+    def tearDown(self):
+        self.browser.quit()
+
+    def test_can_see_diary_list(self):
+        self.browser.get('http://localhost:8000/diary/list')
+        self.assertIn('Diary List', self.browser.title)
+        self.fail('Finish the test')
+
+
+if __name__ == '__main__':
+    unittest.main(warnings='ignore')
+
+
+
 
