@@ -2,12 +2,14 @@ from selenium import webdriver
 import unittest
 
 
-class DiaryListTest(unittest.TestCase):
+class NewUserTest(unittest.TestCase):
 
     def setUp(self):
+        # try
         self.browser = webdriver.Chrome('C:/chromedriver.exe')
 
     def tearDown(self):
+        # except
         self.browser.quit()
 
     def test_can_see_diary_list(self):
