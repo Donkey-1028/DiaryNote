@@ -22,7 +22,7 @@ class Diary(models.Model):
     date = models.DateField('날짜')
     weather = models.CharField('날씨', max_length=2, choices=WeatherChoice.choices,
                                default=WeatherChoice.NOT_INTERESTED)
-    Title = models.CharField('제목', max_length=20)
+    title = models.CharField('제목', max_length=20)
     Contents = models.TextField('내용')
     realized = models.CharField('느낀점', max_length=20)
 
@@ -33,4 +33,5 @@ class Diary(models.Model):
         return str(self.date) + self.author.username
 
     class Meta:
+        verbose_name_plural = 'Diaries'
         ordering = ['-author']
