@@ -1,3 +1,6 @@
+import datetime
+import json
+
 from django.urls import reverse
 from django.contrib.auth.models import User
 
@@ -6,11 +9,9 @@ from rest_framework.test import APITestCase, APIRequestFactory
 from .models import Diary
 from .views import diary_list
 
-import datetime
-import json
-
 
 class DiaryListTest(APITestCase):
+    url = reverse('diary:diary_list')
 
     def setUp(self):
         """
@@ -24,8 +25,7 @@ class DiaryListTest(APITestCase):
         """
         해당 유저의 다이어리가 리턴되는지 테스트
         """
-        url = reverse('diary:diary_list')
-        request = self.request_factory.get(url)
+        request = self.request_factory.get(self.url)
         request.user = self.user
         response = diary_list(request)
         # APIRequestFactory()를 사용하여 직접 뷰를 테스트 하는 경우 내부의 요청-응답 사이클에 의해

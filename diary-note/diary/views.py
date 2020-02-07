@@ -14,3 +14,5 @@ def diary_list(request):
     # 데이터가 여러개 일경우 many=True 파라미터를 줘야한다는것 같다.
     serializers = DiarySerializer(diaries, many=True)
     return Response({'diaries': serializers.data})
+
+
