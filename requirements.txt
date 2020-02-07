@@ -2,3 +2,4 @@ django==3.0
 djangorestframework
 psycopg2
 selenium
+django-rest-swagger==2.1.2
