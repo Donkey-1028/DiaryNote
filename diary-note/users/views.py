@@ -7,7 +7,7 @@ from rest_framework.generics import CreateAPIView, GenericAPIView
 from rest_framework.authtoken.models import Token
 from rest_framework.response import Response
 
-from .serializer import UserRegistrationSerializer, UserLoginSerializer
+from .serializer import UserRegistrationSerializer, UserLoginSerializer, TokenSerializer
 
 # Create your views here.
 
@@ -51,6 +51,7 @@ class UserLoginAPIView(GenericAPIView):
             user = serializer.user
             token, _ = Token.objects.get_or_create(user=user)
             return Response(
+                data=TokenSerializer(token).data,
                 status=status.HTTP_200_OK
             )
         else:

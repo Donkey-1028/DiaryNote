@@ -4,6 +4,7 @@ from django.contrib.auth.hashers import make_password
 from django.utils.translation import ugettext_lazy as _
 
 from rest_framework import serializers
+from rest_framework.authtoken.models import Token
 
 
 class UserRegistrationSerializer(serializers.ModelSerializer):
@@ -46,3 +47,10 @@ class UserLoginSerializer(serializers.Serializer):
         else:
             raise serializers.ValidationError(self.error_messages['invalid_credentials'])
 
+
+class TokenSerializer(serializers.ModelSerializer):
+    auth_token = serializers.CharField(source='key')
+
+    class Meta:
+        model = Token
+        fields = ("auth_token", "created")
