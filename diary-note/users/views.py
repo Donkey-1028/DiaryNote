@@ -3,11 +3,11 @@ from django.db.models.signals import post_save
 from django.conf import settings
 
 from rest_framework import status
-from rest_framework.generics import CreateAPIView
+from rest_framework.generics import CreateAPIView, GenericAPIView
 from rest_framework.authtoken.models import Token
 from rest_framework.response import Response
 
-from .serializer import UserRegistrationSerializer
+from .serializer import UserRegistrationSerializer, UserLoginSerializer
 
 # Create your views here.
 
@@ -38,3 +38,25 @@ def create_token(sender, instance=None, created=False, **kwargs):
     """user 생성시 token 자동 생성"""
     if created:
         Token.objects.create(user=instance)
+
+
+class UserLoginAPIView(GenericAPIView):
+    authentication_classes = ()
+    permission_classes = ()
+    serializer_class = UserLoginSerializer
+
+    def post(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        if serializer.is_valid():
+            user = serializer.user
+            token, _ = Token.objects.get_or_create(user=user)
+            return Response(
+                status=status.HTTP_200_OK
+            )
+        else:
+            return Response(
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+
+
