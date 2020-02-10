@@ -3,7 +3,7 @@ from django.db.models.signals import post_save
 from django.conf import settings
 
 from rest_framework import status
-from rest_framework.generics import CreateAPIView, GenericAPIView
+from rest_framework.generics import CreateAPIView, GenericAPIView, RetrieveDestroyAPIView
 from rest_framework.authtoken.models import Token
 from rest_framework.response import Response
 
@@ -60,4 +60,24 @@ class UserLoginAPIView(GenericAPIView):
             )
 
 
+class UserTokenAPIView(RetrieveDestroyAPIView):
+    lookup_field = "key"
+    serializer_class = TokenSerializer
+    queryset = Token.objects.all()
 
+    def filter_queryset(self, queryset):
+        # 쿼리셋을 주면 사용되는 백엔드에서 새로운 쿼리로 리턴하는 메서드
+        return queryset.filter(user_id=1)
+
+    def retrieve(self, request, key, *args, **kwargs):
+        if key == "current":
+            instance = Token.objects.get(key=request.auth.key)
+            serializer = self.get_serializer(instance)
+            return Response(serializer.data)
+        return super(UserTokenAPIView, self).retrieve(request, key, *args, **kwargs)
+
+    def destroy(self, request, key, *args, **kwargs):
+        if key == "current":
+            Token.objects.get(key=request.auth.key).delete()
+            return Response(status=status.HTTP_204_NO_CONTENT)
+        return super(UserTokenAPIView, self).destroy(request, key, *args, **kwargs)
