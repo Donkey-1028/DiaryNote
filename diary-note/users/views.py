@@ -67,7 +67,7 @@ class UserTokenAPIView(RetrieveDestroyAPIView):
 
     def filter_queryset(self, queryset):
         # 쿼리셋을 주면 사용되는 백엔드에서 새로운 쿼리로 리턴하는 메서드
-        return queryset.filter(user_id=1)
+        return queryset.filter(user=self.request.user)
 
     def retrieve(self, request, key, *args, **kwargs):
         if key == "current":
