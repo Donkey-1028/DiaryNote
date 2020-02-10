@@ -1,8 +1,8 @@
 from django.urls import path
-from .views import diary_list
+from .views import DiaryList
 
 app_name = 'diary'
 
 urlpatterns = [
-    path('list/', diary_list, name='diary_list'),
+    path('list/', DiaryList.as_view(), name='diary_list'),
 ]

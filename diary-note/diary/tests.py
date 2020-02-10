@@ -33,6 +33,7 @@ class DiaryListTest(APITestCase):
         response.render()  # html/text 가 application/json 으로 렌더링
         diary_decoded = response.content.decode()  # 가져온 바이트 코드 디코딩
         diary_json_loaded = json.loads(diary_decoded)  # json 디코딩
+        print(diary_json_loaded)
         diary_owner = diary_json_loaded['diaries'][0]['author']
 
         self.assertEqual(diary_owner, self.user.id)
