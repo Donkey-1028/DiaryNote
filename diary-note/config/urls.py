@@ -21,7 +21,8 @@ from rest_framework.authtoken import views
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/doc/', get_swagger_view(title='Diary API Manual')),
-    path('api/get_token/', views.obtain_auth_token),
     path('diary/', include('diary.urls')),
     path('users/', include('users.urls')),
+    # rest_framework 내부에 구현되어 있는 로그인 로그아웃 url
+    path('api-auth/', include('rest_framework.urls')),
 ]
