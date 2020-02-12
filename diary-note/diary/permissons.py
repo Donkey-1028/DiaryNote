@@ -1,7 +1,10 @@
-from rest_framework.permissions import BasePermission
+from rest_framework import permissions
 
 
-class UserIsOwnedDiary(BasePermission):
+class UserIsOwnerOrReadOnly(permissions.BasePermission):
 
     def has_object_permission(self, request, view, obj):
-        return request.user.id == obj.author.id
+        if request.method in permissions.SAFE_METHODS:
+            return True
+
+        return obj.author == request.user or request.user.is_superuser
