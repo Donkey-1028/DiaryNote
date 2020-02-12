@@ -4,10 +4,10 @@ from django.conf import settings
 
 from rest_framework import status
 from rest_framework.views import APIView
-from rest_framework.generics import CreateAPIView, GenericAPIView, RetrieveDestroyAPIView
-from rest_framework.authentication import SessionAuthentication
+from rest_framework.generics import CreateAPIView, GenericAPIView, RetrieveAPIView
 from rest_framework.authtoken.models import Token
 from rest_framework.response import Response
+from rest_framework.permissions import IsAuthenticated
 
 from .serializer import UserRegistrationSerializer, UserLoginSerializer, TokenSerializer
 
@@ -15,6 +15,7 @@ from .serializer import UserRegistrationSerializer, UserLoginSerializer, TokenSe
 
 
 class UserRegistrationAPIView(CreateAPIView):
+    """회원 가입"""
     authentication_classes = ()
     permission_classes = ()
     serializer_class = UserRegistrationSerializer
@@ -43,6 +44,7 @@ def create_token(sender, instance=None, created=False, **kwargs):
 
 
 class UserLoginAPIView(GenericAPIView):
+    """로그인"""
     authentication_classes = ()
     permission_classes = ()
     serializer_class = UserLoginSerializer
@@ -62,18 +64,15 @@ class UserLoginAPIView(GenericAPIView):
             )
 
 
-class UserLogoutAPIView(APIView):
-    """로그아웃"""
-    def get(self, request):
-        request.session.delete()
-        return Response(status=status.HTTP_200_OK)
-
-
-class UserTokenAPIView(RetrieveDestroyAPIView):
-    """READ , DESTROY"""
+class UserTokenAPIView(RetrieveAPIView):
+    """로그인 된 유저의 토큰 확인"""
     lookup_field = "key"
     serializer_class = TokenSerializer
+    # 인증이 되어야만 확인가능, api-doc에도 인증이 되어야만 추가됨.
+    permission_classes = (IsAuthenticated, )
     queryset = Token.objects.all()
 
-
-
+    def retrieve(self, request, *args, **kwargs):
+        instance = Token.objects.get(user=self.request.user)
+        serializer = self.get_serializer(instance)
+        return Response(serializer.data)

@@ -49,8 +49,7 @@ class UserLoginSerializer(serializers.Serializer):
 
 
 class TokenSerializer(serializers.ModelSerializer):
-    auth_token = serializers.CharField(source='key')
 
     class Meta:
         model = Token
-        fields = ("auth_token", "created")
+        fields = ("key", "created")
