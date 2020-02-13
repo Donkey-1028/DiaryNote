@@ -3,8 +3,8 @@ from django.db.models.signals import post_save
 from django.conf import settings
 
 from rest_framework import status
-from rest_framework.views import APIView
 from rest_framework.generics import CreateAPIView, GenericAPIView, RetrieveAPIView
+from rest_framework.authentication import SessionAuthentication
 from rest_framework.authtoken.models import Token
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
@@ -68,8 +68,9 @@ class UserTokenAPIView(RetrieveAPIView):
     """로그인 된 유저의 토큰 확인"""
     lookup_field = "key"
     serializer_class = TokenSerializer
+    authentication_classes = (SessionAuthentication,)
     # 인증이 되어야만 확인가능, api-doc에도 인증이 되어야만 추가됨.
-    permission_classes = (IsAuthenticated, )
+    permission_classes = (IsAuthenticated,)
     queryset = Token.objects.all()
 
     def retrieve(self, request, *args, **kwargs):
