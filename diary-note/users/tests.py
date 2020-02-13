@@ -22,6 +22,7 @@ class UserRegistrationAPIViewTest(APITestCase):
         """유저가 제대로 생성되는지 테스트"""
         response = self.client.post(self.url, self.user_data)
         self.assertEqual(response.status_code, 201)
+        self.assertEqual(User.objects.count(), 1)
 
     def test_make_token_automatically(self):
         """유저가 생성되었을 때 토큰이 자동으로 생성되는지 테스트"""
@@ -69,6 +70,26 @@ class UserLoginAPIViewTest(APITestCase):
         self.assertTrue('key' in response.data)
 
 
+class UserTokenAPIViewTest(APITestCase):
+    token_url = reverse('users:token')
+    login_url = reverse('users:login')
 
+    def setUp(self):
+        self.username = "testuser"
+        self.password = "test1234"
+        self.email = "test1234@test.com"
+        self.user = User.objects.create_user(username=self.username, password=self.password,
+                                             email=self.email)
+        self.token = Token.objects.get(user_id=self.user.id)
 
+    def test_authenticated_user_check_token(self):
+        """로그인 하였을 때 토큰을 제대로 불러오는지 테스트"""
+        self.client.login(username=self.username, password=self.password)
+        response = self.client.get(self.token_url)
+        self.assertTrue('key' in response.data)
+        self.assertEqual(self.token.key, response.data['key'])
 
+    def test_anonymous_user_check_token(self):
+        """로그인 되지 않은 유저가 토큰을 불러올 때 테스트"""
+        response = self.client.get(self.token_url)
+        self.assertEqual(response.status_code, 403)  # 접근거부
