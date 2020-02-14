@@ -26,12 +26,7 @@ class UserRegistrationAPIView(CreateAPIView):
         serializer.is_valid(raise_exception=True)
         # Called by CreateModelMixin when saving a new object instance.
         self.perform_create(serializer)
-
         data = serializer.data
-        """user = serializer.instance
-        token, created = Token.objects.get_or_create(user=user)
-        data["token"] = token.key"""
-
         headers = self.get_success_headers(serializer.data)
         return Response(data, status=status.HTTP_201_CREATED, headers=headers)
 
