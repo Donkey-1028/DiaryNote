@@ -22,9 +22,9 @@ class Diary(models.Model):
     date = models.DateField('날짜')
     weather = models.CharField('날씨', max_length=2, choices=WeatherChoice.choices,
                                default=WeatherChoice.NOT_INTERESTED)
-    title = models.CharField('제목', max_length=20)
-    Contents = models.TextField('내용')
-    realized = models.CharField('느낀점', max_length=20)
+    title = models.CharField('제목', max_length=20, blank=True)
+    Contents = models.TextField('내용', blank=True)
+    realized = models.CharField('느낀점', max_length=20, blank=True)
 
     created = models.DateTimeField('작성날짜', auto_now_add=True)
     updated = models.DateTimeField('수정날짜', auto_now=True)
