@@ -13,3 +13,9 @@ class DiaryCreateAPIViewSerializer(serializers.ModelSerializer):
     class Meta:
         model = Diary
         exclude = ['created', 'updated', 'author']
+
+
+class DiaryRetrieveUpdateDestroyAPIViewSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Diary
+        exclude = ['created', 'updated', 'author']
