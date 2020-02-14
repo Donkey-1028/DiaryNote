@@ -7,7 +7,7 @@ from django.contrib.auth.models import User
 from rest_framework.test import APITestCase, APIRequestFactory
 
 from .models import Diary
-from .views import diary_list
+
 
 
 class DiaryListTest(APITestCase):
@@ -27,7 +27,7 @@ class DiaryListTest(APITestCase):
         """
         request = self.request_factory.get(self.url)
         request.user = self.user
-        response = diary_list(request)
+        #response = diary_list(request)
         # APIRequestFactory()를 사용하여 직접 뷰를 테스트 하는 경우 내부의 요청-응답 사이클에 의해
         # 반한되는 response 는 rendering 된 데이터가 아니기 때문에 render 를 해줘야 한다고 함.
         response.render()  # html/text 가 application/json 으로 렌더링
