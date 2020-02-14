@@ -82,14 +82,14 @@ class UserTokenAPIViewTest(APITestCase):
                                              email=self.email)
         self.token = Token.objects.get(user_id=self.user.id)
 
-    def test_authenticated_user_check_token(self):
+    def test_authenticated_user_try_to_check_token(self):
         """로그인 하였을 때 토큰을 제대로 불러오는지 테스트"""
         self.client.login(username=self.username, password=self.password)
         response = self.client.get(self.token_url)
         self.assertTrue('key' in response.data)
         self.assertEqual(self.token.key, response.data['key'])
 
-    def test_anonymous_user_check_token(self):
+    def test_anonymous_user_try_to_check_token(self):
         """로그인 되지 않은 유저가 토큰을 불러올 때 테스트"""
         response = self.client.get(self.token_url)
         self.assertEqual(response.status_code, 403)  # 접근거부
