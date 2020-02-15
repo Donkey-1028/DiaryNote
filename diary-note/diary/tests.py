@@ -1,3 +1,4 @@
+import json
 import datetime
 
 from django.urls import reverse
@@ -106,4 +107,63 @@ class DiaryListAPIViewTest(APITestCase):
         self.client.login(username=self.username, password=self.password)
         self.api_authentication()
         response = self.client.get(self.url)
+        diaries = json.loads(response.content)
         self.assertEqual(response.status_code, 200)
+        self.assertEqual(diaries[0]['author'], self.user.id)
+
+    def test_authenticated_user_try_see_list_without_create_list(self):
+        """로그인 한 유저가 diary 를 create 하지 않고 diary list 에 접근할 때 테스트 """
+        user2 = User.objects.create_user(username="testuser2", email="testuser2@test.com", password="test2345")
+        user2_token = Token.objects.get(user=user2)
+        self.client.login(username="testuser2", password="test2345")
+        self.client.credentials(HTTP_AUTHORIZATION='Token ' + user2_token.key)
+        response = self.client.get(self.url)
+        diaries = json.loads(response.content)
+        self.assertEqual(len(diaries), 0)
+
+
+class DiaryRetrieveAPIView(APITestCase):
+
+    def setUp(self):
+        self.username = "testuser"
+        self.password = "test1234"
+        self.email = "test@test.com"
+        self.user = User.objects.create_user(username=self.username, password=self.password,
+                                             email=self.email)
+        self.token = Token.objects.get(user=self.user)
+        self.diary = Diary.objects.create(author=self.user, date="2018-04-16", weather="SY")
+        self.url = reverse('diary:diary_search', kwargs={'pk': self.diary.pk})
+
+    def api_authentication(self):
+        """토큰 인증"""
+        self.client.credentials(HTTP_AUTHORIZATION='Token ' + self.token.key)
+
+    def test_anonymous_user_try_search(self):
+        """익명 유저가 diary 를 search 할 때 테스트"""
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 401)
+
+    def test_authenticated_user_try_search(self):
+        """로그인 한 유저가 diary 를 search 할 때 테스트"""
+        self.client.login(username=self.username, password=self.password)
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 401)
+
+    def test_authenticated_user_try_search_with_token(self):
+        """로그인 한 유저가 token 을 가지고 diary 를 search 할 때 테스트"""
+        self.client.login(username=self.username, password=self.password)
+        self.api_authentication()
+        response = self.client.get(self.url)
+        diary = Diary.objects.get(id=response.data['id'])
+        self.assertEqual(response.data['id'], self.diary.pk)
+        self.assertEqual(diary.author.username, self.username)
+        self.assertEqual(response.status_code, 200)
+
+    def test_authenticated_user_try_search_diary_without_create_diary(self):
+        """로그인 한 유저가 diary 를 create 하지 않고 search 할 때 테스트"""
+        user2 = User.objects.create_user(username="testuser2", email="testuser2@test.com", password="test2345")
+        user2_token = Token.objects.get(user=user2)
+        self.client.login(username="testuser2", password="test2345")
+        self.client.credentials(HTTP_AUTHORIZATION='Token ' + user2_token.key)
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 404)
