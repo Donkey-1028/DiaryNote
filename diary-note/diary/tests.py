@@ -167,3 +167,104 @@ class DiaryRetrieveAPIView(APITestCase):
         self.client.credentials(HTTP_AUTHORIZATION='Token ' + user2_token.key)
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, 404)
+
+
+class DiaryUpdateAPIViewTest(APITestCase):
+    def setUp(self):
+        self.username = "testuser"
+        self.password = "test1234"
+        self.email = "test@test.com"
+        self.user = User.objects.create_user(username=self.username, password=self.password,
+                                             email=self.email)
+        self.token = Token.objects.get(user=self.user)
+        self.diary = Diary.objects.create(author=self.user, date="2018-04-16", weather="SY")
+        self.url = reverse('diary:diary_update', kwargs={'pk': self.diary.pk})
+
+    def api_authentication(self):
+        """토큰 인증"""
+        self.client.credentials(HTTP_AUTHORIZATION='Token ' + self.token.key)
+
+    def test_anonymous_user_try_patch(self):
+        """익명 유저가 patch 할 때 테스트"""
+        response = self.client.patch(self.url)
+        self.assertEqual(response.status_code, 401)
+
+    def test_anonymous_user_try_put(self):
+        """익명 유저가 put 할 때 테스트"""
+        response = self.client.put(self.url)
+        self.assertEqual(response.status_code, 401)
+
+    def test_authenticated_user_try_patch(self):
+        """로그인 된 유저가 patch 할 때 테스트"""
+        response = self.client.patch(self.url)
+        self.assertEqual(response.status_code, 401)
+
+    def test_authenticated_user_try_put(self):
+        """로그인 된 유저가 put 할 때 테스트"""
+        self.client.login(username=self.username, password=self.password)
+        response = self.client.put(self.url)
+        self.assertEqual(response.status_code, 401)
+
+    def test_authenticated_user_try_patch_with_token(self):
+        """로그인 된 유저가 token 을 가지고 path 할 때 테스트"""
+        self.client.login(username=self.username, password=self.password)
+        self.api_authentication()
+        patch_data = {
+            "date": "2020-02-15",
+            "weather": "FG",
+            "title": "patch-test",
+            "Contents": "patch-contents",
+            "realized": "patch-realized"
+        }
+        response = self.client.patch(self.url, data=patch_data)
+        patch_data['id'] = self.diary.pk
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(patch_data, response.data)
+
+    def test_authenticated_user_try_put_with_token(self):
+        """로그인 유저가 token 을 가지고 put 할 때 테스트"""
+        self.client.login(username=self.username, password=self.password)
+        self.api_authentication()
+        put_data = {
+            "date": "2020-02-15",
+            "weather": "FG",
+            "title": "patch-test",
+            "Contents": "patch-contents",
+            "realized": "patch-realized"
+        }
+        response = self.client.put(self.url, data=put_data)
+        put_data['id'] = self.diary.pk
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(put_data, response.data)
+
+    def test_authenticated_user_try_patch_and_put_with_wrong_data(self):
+        """로그인 된 유저가 잘못된 데이터로 patch, put 할 때 테스트"""
+        self.client.login(username=self.username, password=self.password)
+        self.api_authentication()
+        wrong_data = {
+            "date": "wrong-date",
+            "weather": "wrong-weather",
+            "title": "patch-test",
+            "Contents": "patch-contents",
+            "realized": "patch-realized"
+        }
+        patch_response = self.client.patch(self.url, data=wrong_data)
+        put_response = self.client.put(self.url, data=wrong_data)
+        self.assertEqual(patch_response.status_code, put_response.status_code, 400)
+
+    def test_authenticated_user_try_patch_and_put_without_create_diary(self):
+        """로그인 한 유저가 diary 를 create 하지 않고 patch, put 할 때 테스트"""
+        user2 = User.objects.create_user(username="testuser2", password="test2345", email="testuser2@test.com")
+        user2_token = Token.objects.get(user=user2)
+        self.client.login(username="testuser2", password="test2345")
+        self.client.credentials(HTTP_AUTHORIZATION='Token ' + user2_token.key)
+        data = {
+            "date": "2020-02-15",
+            "weather": "FG",
+            "title": "patch-test",
+            "Contents": "patch-contents",
+            "realized": "patch-realized"
+        }
+        patch_response = self.client.patch(self.url, data=data)
+        put_response = self.client.put(self.url, data=data)
+        self.assertEqual(patch_response.status_code, put_response.status_code, 404)
