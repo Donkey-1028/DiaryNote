@@ -268,3 +268,48 @@ class DiaryUpdateAPIViewTest(APITestCase):
         patch_response = self.client.patch(self.url, data=data)
         put_response = self.client.put(self.url, data=data)
         self.assertEqual(patch_response.status_code, put_response.status_code, 404)
+
+
+class DiaryDestroyAPIViewTest(APITestCase):
+    def setUp(self):
+        self.username = "testuser"
+        self.password = "test1234"
+        self.email = "test@test.com"
+        self.user = User.objects.create_user(username=self.username, password=self.password,
+                                             email=self.email)
+        self.token = Token.objects.get(user=self.user)
+        self.diary = Diary.objects.create(author=self.user, date="2018-04-16", weather="SY")
+        self.url = reverse('diary:diary_delete', kwargs={'pk': self.diary.pk})
+
+    def api_authentication(self):
+        """토큰 인증"""
+        self.client.credentials(HTTP_AUTHORIZATION='Token ' + self.token.key)
+
+    def test_anonymous_user_try_destroy(self):
+        """익명 유저가 destroy 할 때 테스트"""
+        response = self.client.delete(self.url)
+        self.assertEqual(response.status_code, 401)
+
+    def test_authenticated_user_try_destroy(self):
+        """로그인 된 유저가 destroy 할 때 테스트"""
+        self.client.login(username=self.username, password=self.password)
+        response = self.client.delete(self.url)
+        self.assertEqual(response.status_code, 401)
+
+    def test_authenticated_user_try_destroy_without_create_diary(self):
+        """로그인 한 유저가 diary 를 create 하지 않고 destroy 할 때 테스트"""
+        user2 = User.objects.create_user(username='testuser2', email='testuser2@test.com', password='test2345')
+        user2_token = Token.objects.get(user=user2)
+        self.client.login(username='testuser2', password='test2345')
+        self.client.credentials(HTTP_AUTHORIZATION='Token ' + user2_token.key)
+        response = self.client.delete(self.url)
+        self.assertEqual(response.status_code, 404)
+
+    def test_authenticated_user_try_destroy_with_token(self):
+        """로그인 한 유저가 token 을 가지고 destroy 할 때 테스트"""
+        self.client.login(username=self.username, password=self.password)
+        self.api_authentication()
+        response = self.client.delete(self.url)
+        diary_count = Diary.objects.filter(author_id=self.user.id).count()
+        self.assertEqual(response.status_code, 204)
+        self.assertEqual(diary_count, 0)
