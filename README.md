@@ -17,7 +17,7 @@
 	 
 
 ## 3. 주요 기능
-#### 3.1 diary-note
+#### 3.1 diary
 * 기본적인 CRUD
 * Token, Session 인증
 * 기능별 TEST 코드 작성
